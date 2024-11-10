@@ -2,8 +2,7 @@ from rest_framework import serializers
 from authuser.models import User
 
 
-class UserDetailSerializer(serializers.ModelSerializer):
-
+class UserDetailRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
@@ -19,15 +18,27 @@ class UserDetailSerializer(serializers.ModelSerializer):
         ]
 
 
-class LoginCredentialSerializer:
-
+class UserDetailResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["email", "password"]
+        fields = [
+            "id",
+            "name",
+            "username",
+            "address",
+            "contact",
+            "email",
+            "designation",
+            "is_full_time",
+        ]
 
 
-class LoginResponseSerializer:
+class LoginCredentialSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(max_length=50, write_only=True)
 
+
+class LoginResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "name", "designation", "contact", "address" "email"]
+        fields = ["id", "name", "designation", "contact", "address", "email"]
