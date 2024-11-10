@@ -62,6 +62,26 @@ class UserDetailView(GenericAPIView):
             )
 
 
+class AllUsersResponseView(GenericAPIView):
+    serializer_class = serializer.UserDetailResponseSerializer
+
+    def get(self, request):
+        try:
+            all_users = User.objects.all()
+            all_users = self.serializer_class(all_users, many=True)
+
+            if all_users:
+                return Response(
+                    {
+                        "message": "All users fetched sucesfully!",
+                        "data": all_users.data,
+                    },
+                    status=status.HTTP_200_OK,
+                )
+        except:
+            return Response({"message": "Failed to fetch users"})
+
+
 class EditUserDetailView(GenericAPIView):
     serializer_class = serializer.UserDetailResponseSerializer
 
