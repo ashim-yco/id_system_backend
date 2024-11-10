@@ -4,11 +4,11 @@ from rest_framework import status
 from authuser.models import User
 from authuser.api import serializer
 from django.contrib.auth.hashers import make_password
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class RegisterUserView(GenericAPIView):
-    queryset = User
-    serializer_class = serializer.UserDetailSerializer
+    serializer_class = serializer.UserDetailRegisterSerializer
 
     def post(self, request):
         user_details = self.serializer_class(data=request.data)
@@ -28,25 +28,63 @@ class RegisterUserView(GenericAPIView):
                 )
 
             else:
-                user_details.save(
-                    password=make_password(password=request.data.get("password")),
+                user_details.validated_data["password"] = make_password(
+                    user_details.validated_data["password"]
                 )
+                user_details.save()
                 return Response(
-                    {"message": "User registered sucessfully"}, data=user_details
+                    {
+                        "message": "User registered successfully",
+                    },
+                    status=status.HTTP_201_CREATED,
                 )
 
         else:
-            return Response({"message": "Request body cannot be null"})
+            return Response(
+                {"error": user_details.errors}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class LoginUserView(GenericAPIView):
+    serializer_class = serializer.LoginCredentialSerializer
 
     def post(self, request):
-        return Response({"message": "This is a test response for login"})
+        login_data = request.data
+        login_credentials = self.serializer_class(data=login_data)
+
+        if login_credentials.is_valid():
+            username = login_credentials.validated_data.get("username")
+            password = login_credentials.validated_data.get("password")
+
+            try:
+                user = User.objects.get(username=username)
+
+                if not user.check_password(password):
+                    return Response(
+                        {"message": "Invalid Credentials!"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                refresh = RefreshToken.for_user(user)
+                return Response(
+                    {"refresh": str(refresh), "access": str(refresh.access_token)},
+                    status=status.HTTP_200_OK,
+                )
+
+            except User.DoesNotExist:
+                return Response(
+                    {"message": "User Does not Exist!"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        else:
+            return Response(
+                {"message": "Invalid Credentials!"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class UserDetailView(GenericAPIView):
-    serializer_class = serializer.UserDetailSerializer
+    serializer_class = serializer.UserDetailResponseSerializer
 
     def get(self, request, userid):
         try:
@@ -60,9 +98,28 @@ class UserDetailView(GenericAPIView):
             )
 
 
-class EditUserDetailView(GenericAPIView):
+class AllUsersResponseView(GenericAPIView):
+    serializer_class = serializer.UserDetailResponseSerializer
 
-    serializer_class = serializer.UserDetailSerializer
+    def get(self, request):
+        try:
+            all_users = User.objects.all()
+            all_users = self.serializer_class(all_users, many=True)
+
+            if all_users:
+                return Response(
+                    {
+                        "message": "All users fetched sucesfully!",
+                        "data": all_users.data,
+                    },
+                    status=status.HTTP_200_OK,
+                )
+        except:
+            return Response({"message": "Failed to fetch users"})
+
+
+class EditUserDetailView(GenericAPIView):
+    serializer_class = serializer.UserDetailResponseSerializer
 
     def put(self, request, userid):
         try:
