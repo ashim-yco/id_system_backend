@@ -1,7 +1,8 @@
+from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
 
 
-class User(models.Model):
+class User(AbstractBaseUser):
 
     name = models.CharField(max_length=255, db_column="NAME")
 
@@ -19,6 +20,9 @@ class User(models.Model):
     contact = models.CharField(
         max_length=255, blank=True, null=True, unique=True, db_column="CONTACT"
     )
+
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["email"]
 
     class Meta:
         db_table = "USER"

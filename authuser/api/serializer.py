@@ -33,12 +33,13 @@ class UserDetailResponseSerializer(serializers.ModelSerializer):
         ]
 
 
-class LoginCredentialSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField(max_length=50, write_only=True)
-
-
-class LoginResponseSerializer(serializers.ModelSerializer):
+class LoginCredentialSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "name", "designation", "contact", "address", "email"]
+        fields = ["username", "password"]
+
+
+# class LoginResponseSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ["id", "name", "designation", "contact", "address", "email"]
