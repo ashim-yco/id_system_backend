@@ -8,7 +8,7 @@ from django.contrib.auth.hashers import make_password
 
 class RegisterUserView(GenericAPIView):
     queryset = User
-    serializer_class = serializer.UserDetailSerializer
+    serializer_class = serializer.UserDetailRegisterSerializer
 
     def post(self, request):
         user_details = self.serializer_class(data=request.data)
@@ -32,11 +32,13 @@ class RegisterUserView(GenericAPIView):
                     password=make_password(password=request.data.get("password")),
                 )
                 return Response(
-                    {"message": "User registered sucessfully"}, data=user_details
+                    {
+                        "message": "User registered sucessfully",
+                    }
                 )
 
         else:
-            return Response({"message": "Request body cannot be null"})
+            return Response({"error": user_details.errors})
 
 
 class LoginUserView(GenericAPIView):
@@ -46,7 +48,7 @@ class LoginUserView(GenericAPIView):
 
 
 class UserDetailView(GenericAPIView):
-    serializer_class = serializer.UserDetailSerializer
+    serializer_class = serializer.UserDetailResponseSerializer
 
     def get(self, request, userid):
         try:
@@ -61,8 +63,7 @@ class UserDetailView(GenericAPIView):
 
 
 class EditUserDetailView(GenericAPIView):
-
-    serializer_class = serializer.UserDetailSerializer
+    serializer_class = serializer.UserDetailResponseSerializer
 
     def put(self, request, userid):
         try:
