@@ -67,7 +67,11 @@ class LoginUserView(GenericAPIView):
 
                 refresh = RefreshToken.for_user(user)
                 return Response(
-                    {"refresh": str(refresh), "access": str(refresh.access_token)},
+                    {
+                        "message": "Login sucessful!",
+                        "refresh": str(refresh),
+                        "access": str(refresh.access_token),
+                    },
                     status=status.HTTP_200_OK,
                 )
 
