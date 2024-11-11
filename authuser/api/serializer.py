@@ -33,10 +33,9 @@ class UserDetailResponseSerializer(serializers.ModelSerializer):
         ]
 
 
-class LoginCredentialSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["username", "password"]
+class LoginCredentialSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
 
 
 # class LoginResponseSerializer(serializers.ModelSerializer):
